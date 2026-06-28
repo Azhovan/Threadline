@@ -1,33 +1,25 @@
 # Threadline
 
-Threadline lets two terminal agents talk to each other over a local WebSocket.
+**Let your AI agents talk to each other.** Threadline is a tiny bridge that lets
+two agents — running in separate terminals — collaborate in real time: hand off
+work, ask each other questions, review one another's output, and coordinate to a
+shared goal.
 
-## What it does
+## Why
 
-One agent sends a message; the other **wakes up**, reads it, replies, and goes
-back to sleep — no polling, no persistent listener. A small relay process sits in
-the middle and brokers the conversation.
+A single agent works alone in its own context. Threadline lets you run several
+and have them *cooperate*:
 
-```
- Terminal A                  relay (one process)              Terminal B
- ┌──────────┐          ┌────────────────────────┐          ┌──────────┐
- │ Agent A  │  send.js │  ws://127.0.0.1:9000    │  send.js │ Agent B  │
- │          ├─────────►│  broadcasts + backlog   │◄─────────┤          │
- │          │  wait.js │                         │  wait.js │          │
- │  inbox ◄─┤◄─────────┤                         ├─────────►├─► inbox  │
- └──────────┘          └────────────────────────┘          └──────────┘
-```
-
-The "wake up" is the trick: an agent runs in *turns*, not as a long-lived
-listener, so `wait.js` does the blocking. It connects, waits for a fresh message,
-appends it to `inbox.<name>.md`, and **exits** — and that exit is what re-invokes
-the agent for its next turn. The agent only spends a turn when there's something
-to read.
-
-The relay is a standing service you start once. After that, *any* local process —
-in any terminal, any directory — can join by pointing at the same relay URL. Each
-agent writes its inbox to its own working directory, so they share nothing but the
-URL.
+- **Divide and conquer** — one agent writes code while another reviews it, or a
+  planner delegates subtasks to workers and collects the results.
+- **Specialize** — give each agent a focused role (researcher, coder, critic) and
+  let them confer instead of cramming everything into one prompt.
+- **Coordinate anywhere** — agents can run in any terminal, any directory, even
+  different projects on the machine. They share nothing but a relay URL.
+- **No wasted turns** — an agent sleeps until a message actually arrives, so it
+  spends a turn (and tokens) only when there's something to act on.
+- **Zero infrastructure** — no broker, no cloud, no accounts. One local process
+  and two small scripts.
 
 ## Requirements
 
@@ -88,6 +80,28 @@ header comment at the top of the file — see `send.js` and `wait.js`.
 > **Port note:** the scripts default to `8787`, but the Makefile (and this guide)
 > use `9000`. Always export the same `RELAY_URL` in every terminal so all agents
 > agree on the relay.
+
+## How it works
+
+```
+ Terminal A                  relay (one process)              Terminal B
+ ┌──────────┐          ┌────────────────────────┐          ┌──────────┐
+ │ Agent A  │  send.js │  ws://127.0.0.1:9000    │  send.js │ Agent B  │
+ │          ├─────────►│  broadcasts + backlog   │◄─────────┤          │
+ │          │  wait.js │                         │  wait.js │          │
+ │  inbox ◄─┤◄─────────┤                         ├─────────►├─► inbox  │
+ └──────────┘          └────────────────────────┘          └──────────┘
+```
+
+A small relay process sits in the middle and broadcasts each message to the other
+agents. The "wake up" is the trick: an agent runs in *turns*, not as a long-lived
+listener, so `wait.js` does the blocking. It connects, waits for a fresh message,
+appends it to `inbox.<name>.md`, and **exits** — and that exit is what re-invokes
+the agent for its next turn.
+
+The relay is a standing service you start once. After that, any local process can
+join by pointing at the same relay URL, and each agent writes its inbox to its own
+working directory — so they share nothing but the URL.
 
 ## Caveats
 
