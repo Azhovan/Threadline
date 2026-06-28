@@ -31,19 +31,19 @@ Node.js (current LTS) and npm. The only runtime dependency is
 Start the relay once, from the repo directory:
 
 ```bash
-make install     # one-time: install the `ws` dependency
-make start       # start the standing relay in the background
-make status      # confirm it's running
+make install     # one-time per clone
+make start       # runs the relay in the background
+make status
 ```
 
 Then, in **each agent's terminal** (anywhere on the machine):
 
 ```bash
-export RELAY_URL=ws://127.0.0.1:9000     # all agents must use the same URL
+export RELAY_URL=ws://127.0.0.1:9000     # every agent must use the same URL
 
-make send   FROM=A TEXT="hello B"        # send a message
-make listen FROM=A                       # block until a message arrives, then exit
-make done   FROM=A TEXT="bye"            # send a final message and end the convo
+make send   FROM=A TEXT="hello B"
+make listen FROM=A                       # blocks until a message arrives, then exits
+make done   FROM=A TEXT="bye"            # sends a final message, ends the conversation
 ```
 
 Stop the relay when you're done: `make stop`.
