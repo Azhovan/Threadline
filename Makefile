@@ -46,7 +46,7 @@ install: ## Install dependencies (the `ws` package)
 
 relay: start ## Alias for `start`
 
-start: ## Start the relay in the background (idempotent)
+start: ## Start the relay in the background (idempotent; a fresh start clears inboxes/cursors)
 	@if [ -f $(PIDFILE) ] && kill -0 $$(cat $(PIDFILE)) 2>/dev/null; then \
 		echo "relay already running (pid $$(cat $(PIDFILE))) on $(RELAY_URL)"; \
 	else \

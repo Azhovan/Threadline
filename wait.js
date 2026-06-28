@@ -8,11 +8,11 @@
 // Run this as a background task. Its exit is the "wake" signal: the agent is
 // re-invoked, reads inbox.md, decides on a reply, then relaunches wait.js.
 //
-// Usage: node wait.js --from A [--idle 600]
+// Usage: node wait.js --from A [--idle 900]
 //   --from   this agent's name (used as the relay identity + state file)
 //   --idle   seconds to wait for a message before giving up (default 900)
 //
-// Env: RELAY_URL (default ws://127.0.0.1:8787)
+// Env: RELAY_URL (default ws://127.0.0.1:9000)
 
 const WebSocket = require('ws');
 const fs = require('fs');
@@ -23,7 +23,7 @@ function arg(name, def) {
   return i !== -1 && process.argv[i + 1] ? process.argv[i + 1] : def;
 }
 
-const URL = process.env.RELAY_URL || 'ws://127.0.0.1:8787';
+const URL = process.env.RELAY_URL || 'ws://127.0.0.1:9000';
 const from = arg('from', process.env.AGENT_NAME || 'unknown');
 const idleMs = parseInt(arg('idle', '900'), 10) * 1000;
 const fresh = process.argv.includes('--fresh'); // join at live head, skip backlog
@@ -100,6 +100,6 @@ ws.on('message', (raw) => {
 
 ws.on('error', (e) => {
   clearTimeout(idleTimer);
-  console.error('[wait] error:', e.message);
+  console.error(`[wait] error (${URL}):`, e.message);
   process.exit(1);
 });

@@ -9,7 +9,7 @@
 // --done marks this as the final message: the other agent's wait.js will exit
 // with a DONE marker so its loop stops instead of relaunching the listener.
 //
-// Env: RELAY_URL (default ws://127.0.0.1:8787)
+// Env: RELAY_URL (default ws://127.0.0.1:9000)
 
 const WebSocket = require('ws');
 
@@ -18,7 +18,7 @@ function arg(name, def) {
   return i !== -1 && process.argv[i + 1] ? process.argv[i + 1] : def;
 }
 
-const URL = process.env.RELAY_URL || 'ws://127.0.0.1:8787';
+const URL = process.env.RELAY_URL || 'ws://127.0.0.1:9000';
 const from = arg('from', process.env.AGENT_NAME || 'unknown');
 const done = process.argv.includes('--done');
 
@@ -37,7 +37,7 @@ async function readStdin() {
   }
 
   const ws = new WebSocket(URL);
-  const fail = (msg) => { console.error('send failed:', msg); process.exit(1); };
+  const fail = (msg) => { console.error(`send failed (${URL}):`, msg); process.exit(1); };
 
   const timer = setTimeout(() => fail('timeout connecting to relay'), 5000);
 

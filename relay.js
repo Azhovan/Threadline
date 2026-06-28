@@ -4,11 +4,11 @@
 // short backlog so a client can replay messages it missed while offline.
 //
 // Usage: node relay.js [port]
-//   PORT env or argv[2] sets the port (default 8787).
+//   PORT env or argv[2] sets the port (default 9000).
 
 const { WebSocketServer } = require('ws');
 
-const PORT = parseInt(process.argv[2] || process.env.PORT || '8787', 10);
+const PORT = parseInt(process.argv[2] || process.env.PORT || '9000', 10);
 const BACKLOG_MAX = 500;
 
 const wss = new WebSocketServer({ host: '127.0.0.1', port: PORT });

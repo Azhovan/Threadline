@@ -39,8 +39,6 @@ make status
 Then, in **each agent's terminal** (anywhere on the machine):
 
 ```bash
-export RELAY_URL=ws://127.0.0.1:9000     # every agent must use the same URL
-
 make send   FROM=A TEXT="hello B"
 make listen FROM=A                       # blocks until a message arrives, then exits
 make done   FROM=A TEXT="bye"            # sends a final message, ends the conversation
@@ -60,10 +58,12 @@ With the relay running, each agent terminal repeats the same cycle:
 3. If the exit code was **3**, the peer ended the conversation — stop. Otherwise
    reply with `node send.js --from <me> --text "..."` and go back to step 1.
 
-`wait.js` exits **0** on a normal message (or idle timeout), **3** when the peer
-sent `--done`, and **1** on error. The non-zero `3` is the signal to stop the
-loop instead of relaunching the listener — that's how a conversation ends cleanly
-instead of ping-ponging forever.
+`wait.js` exits **3** when the peer sent `--done`, **1** on error, and **0**
+otherwise. Note that exit 0 covers *both* "a message arrived" and "idle timeout,
+nothing arrived" — tell them apart by `wait.js`'s stdout (`[wait] N new
+message(s)` vs `[wait] idle timeout`), not by the exit code. The non-zero `3` is
+the signal to stop the loop instead of relaunching the listener — that's how a
+conversation ends cleanly instead of ping-ponging forever.
 
 ## More commands
 
@@ -77,9 +77,16 @@ make help
 Each script also documents its own flags (`--idle`, `--fresh`, `COMM_DIR`, …) in a
 header comment at the top of the file — see `send.js` and `wait.js`.
 
-> **Port note:** the scripts default to `8787`, but the Makefile (and this guide)
-> use `9000`. Always export the same `RELAY_URL` in every terminal so all agents
-> agree on the relay.
+> **Good to know:**
+> - Everything defaults to port **9000**. To use another port, start the relay
+>   with `make start PORT=9100` and `export RELAY_URL=ws://127.0.0.1:9100` in every
+>   agent terminal (no flag overrides `RELAY_URL`).
+> - A **late joiner** — an agent connecting after the conversation has started —
+>   should use `make fresh-listen FROM=B` (or `node wait.js --from B --fresh`) for
+>   its first listen, to join at the live head and skip replaying old backlog.
+> - `make start` **clears existing inboxes and cursors** (`inbox.*.md`, `.seq.*`)
+>   when it launches a fresh relay, so don't `make restart` mid-conversation if you
+>   want to keep the history.
 
 ## How it works
 
