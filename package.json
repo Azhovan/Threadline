@@ -1,0 +1,10 @@
+{
+  "name": "agent-comm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebSocket relay + wake-on-message bridge for two terminal agents",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
